@@ -8,13 +8,28 @@ using System.Text;
 using System.Threading.Tasks;
 using YouTubeParse;
 using YouTubePlaylistSpy.Annotations;
+using YouTubePlaylistSpy.ViewModel.Commands;
 
 namespace YouTubePlaylistSpy.ViewModel
 {
-    class MainWindowViewModel : INotifyPropertyChanged
+    public class MainWindowViewModel : INotifyPropertyChanged
     {
         #region Public Properties
         private string _urlInput;
+
+        private bool _isGeneratingData;
+        public bool IsGeneratingData
+        {
+            get { return _isGeneratingData; }
+            set
+            {
+                if (value == _isGeneratingData) return;
+                _isGeneratingData = value;
+                OnPropertyChanged();
+                GetPlaylistInfoCommand.RaiseCanExecuteChanged();
+            }
+        }
+
         public string UrlInput
         {
             get { return _urlInput; }
@@ -23,6 +38,7 @@ namespace YouTubePlaylistSpy.ViewModel
                 if (value == _urlInput) return;
                 _urlInput = value;
                 OnPropertyChanged();
+                GetPlaylistInfoCommand.RaiseCanExecuteChanged();
             }
         }
         private string _playlistTitle;
@@ -81,8 +97,8 @@ namespace YouTubePlaylistSpy.ViewModel
                 OnPropertyChanged();
             }
         }
-        private TimeSpan _totalDuration;
-        public TimeSpan TotalDuration
+        private string _totalDuration;
+        public string TotalDuration
         {
             get { return _totalDuration; }
             set
@@ -103,6 +119,17 @@ namespace YouTubePlaylistSpy.ViewModel
                 OnPropertyChanged();
             }
         }
+        private int _viewsAvg;
+        public int ViewsAvg
+        {
+            get { return _viewsAvg; }
+            set
+            {
+                if (value == _viewsAvg) return;
+                _viewsAvg = value;
+                OnPropertyChanged();
+            }
+        }
         private int _totalCommentsCount;
         public int TotalCommentsCount
         {
@@ -111,6 +138,17 @@ namespace YouTubePlaylistSpy.ViewModel
             {
                 if (value == _totalCommentsCount) return;
                 _totalCommentsCount = value;
+                OnPropertyChanged();
+            }
+        }
+        private int _commentsAvg;
+        public int CommentsAvg
+        {
+            get { return _commentsAvg; }
+            set
+            {
+                if (value == _commentsAvg) return;
+                _commentsAvg = value;
                 OnPropertyChanged();
             }
         }
@@ -127,17 +165,27 @@ namespace YouTubePlaylistSpy.ViewModel
             }
         }
 
-        private YouTubePlaylist _youTubePlaylist;
+        private YouTubePlaylistPage _youTubePlaylist;
         private YouTubeVideoGroup _videoGroup;
         #endregion
-        
-        public bool GetPlaylistInfo(string textInput)
-        {
-            if (!YouTubePlaylist.ValidatePlaylistUrl(textInput)) return false;
-            _youTubePlaylist = new YouTubePlaylist(textInput);
-            _videoGroup = _youTubePlaylist.GetYouTubeVideoGroup();
-            SetInformation();
+        #region Commands
+        public GetPlaylistInfoCommand GetPlaylistInfoCommand { get; set; }
+        #endregion
 
+        public MainWindowViewModel()
+        {
+            GetPlaylistInfoCommand = new GetPlaylistInfoCommand(this);
+            TotalDuration = string.Empty;
+        }
+        public async Task<bool> GetPlaylistInfoAsync(string textInput)
+        {
+            if (!YouTubePlaylistPage.ValidatePlaylistUrl(textInput)) return false;
+            IsGeneratingData = true;
+            _youTubePlaylist = new YouTubePlaylistPage(textInput);
+            await _youTubePlaylist.DownloadPageAsync();
+            _videoGroup = await _youTubePlaylist.GetYouTubeVideoGroupAsync();
+            SetInformation();
+            IsGeneratingData = false;
             return true;
         }
 
@@ -148,10 +196,21 @@ namespace YouTubePlaylistSpy.ViewModel
             PlaylistVideoCount = _youTubePlaylist.NumVideos;
             PlaylistViewCount = _youTubePlaylist.Views;
             LastUpdated = _youTubePlaylist.LastUpdated;
-            TotalDuration = _youTubePlaylist.Duration;
-            TotalVideoViewCount = _videoGroup.TotalViewsCount;
-            TotalCommentsCount = _videoGroup.TotalCommentsCount;
+            TotalDuration = SetTotalDuration();
+            TotalVideoViewCount = _videoGroup.ViewsTotal;
+            TotalCommentsCount = _videoGroup.CommentsTotal;
             PlaylistVideos = new ObservableCollection<string>(_videoGroup.TitlesList);
+        }
+
+        private string SetTotalDuration()
+        {
+            var sb = new StringBuilder();
+            if (_videoGroup.DurationTotal.TotalHours > 0)
+                sb.Append(string.Format("{0:####} hours, ", _videoGroup.DurationTotal.TotalHours));
+            if (_videoGroup.DurationTotal.Minutes > 0)
+                sb.Append(string.Format("{0} minutes, ", _videoGroup.DurationTotal.Minutes));
+            sb.Append(string.Format("{0} seconds ", _videoGroup.DurationTotal.Seconds));
+            return sb.ToString();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

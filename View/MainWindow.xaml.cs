@@ -21,18 +21,9 @@ namespace YouTubePlaylistSpy.View
     /// </summary>
     public partial class MainWindow : Window
     {
-        private MainWindowViewModel _viewModel;
         public MainWindow()
         {
             InitializeComponent();
-            _viewModel = FindResource("ViewModel") as MainWindowViewModel;
-        }
-
-        private void UrlInputButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (!_viewModel.GetPlaylistInfo(PlaylistUrlInput.Text))
-                MessageBox.Show("Invalid YouTube Playlist URL. Please try again!", "Invalid URL", MessageBoxButton.OK,
-                    MessageBoxImage.Error);
         }
     }
 }

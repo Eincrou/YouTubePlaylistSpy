@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:YouTubePlaylistSpy"
         xmlns:viewmodel="clr-namespace:YouTubePlaylistSpy.ViewModel"
         mc:Ignorable="d"
-        Title="YouTube Playlist Spy" Height="350" Width="800" ResizeMode="CanMinimize">
+        Title="YouTube Playlist Spy" Height="350" Width="800">
     <Window.Background>
         <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.MenuColorKey}}"/>
     </Window.Background>
@@ -19,29 +19,29 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300"/>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="400"/>
         </Grid.ColumnDefinitions>
         <StackPanel HorizontalAlignment="Center" Margin="0" Orientation="Horizontal" Grid.ColumnSpan="2">
-            <TextBox x:Name="PlaylistUrlInput" Height="23" Margin="0,0,10,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Bottom" d:LayoutOverrides="TopPosition, BottomPosition" Width="350"/>
-            <Button x:Name="UrlInputButton" Content="OK" HorizontalAlignment="Right" Margin="0" VerticalAlignment="Bottom" Width="75" Click="UrlInputButton_Click"/>
+            <TextBox x:Name="PlaylistUrlInput" Height="23" Margin="0,0,10,0" TextWrapping="Wrap" Text="{Binding UrlInput, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Bottom" d:LayoutOverrides="TopPosition, BottomPosition" Width="500"/>
+            <Button x:Name="UrlInputButton" Content="OK" HorizontalAlignment="Right" Margin="0" VerticalAlignment="Bottom" Width="75" Command="{Binding GetPlaylistInfoCommand}" CommandParameter="{Binding UrlInput, NotifyOnSourceUpdated=True}"/>
         </StackPanel>
         <StackPanel Grid.Row="1">
             <StackPanel Orientation="Horizontal">
                 <TextBlock x:Name="TitleTB" TextWrapping="Wrap" Text="Title:" Margin="0,0,10,0" FontWeight="Bold"/>
-                <TextBox x:Name="TitleTBx" Height="23" TextWrapping="Wrap" Text="{Binding PlaylistTitle}" IsReadOnly="True"/>
+                <TextBlock x:Name="TitleTBx" Height="23" TextWrapping="Wrap" Text="{Binding PlaylistTitle}" />
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBlock x:Name="OwnerTB" TextWrapping="Wrap" Text="Owner:" Margin="0,0,10,0" FontWeight="Bold"/>
-                <TextBox x:Name="OwnerTBx" Height="23" TextWrapping="Wrap" Text="{Binding Owner}" IsReadOnly="True"/>
+                <TextBlock x:Name="OwnerTBx" Height="23" TextWrapping="Wrap" Text="{Binding Owner}" />
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBlock x:Name="NumVidsTB" TextWrapping="Wrap" Text="# Videos:" Margin="0,0,10,0" FontWeight="Bold"/>
-                <TextBox x:Name="NumVidsTBx" Height="23" TextWrapping="Wrap" Text="{Binding PlaylistVideoCount}" IsReadOnly="True"/>
+                <TextBlock x:Name="NumVidsTBx" Height="23" TextWrapping="Wrap" Text="{Binding PlaylistVideoCount}" />
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBlock x:Name="PlaylistViewsTB" TextWrapping="Wrap" Text="Playlist Views:" Margin="0,0,10,0" FontWeight="Bold"/>
-                <TextBox x:Name="PlaylistViewsTBx" Height="23" TextWrapping="Wrap" Text="{Binding PlaylistViewCount, StringFormat={}{0:0\,0}}" IsReadOnly="True"/>
+                <TextBlock x:Name="PlaylistViewsTBx" Height="23" TextWrapping="Wrap" Text="{Binding PlaylistViewCount, StringFormat={}{0:#\,#}}"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBlock x:Name="UpdatedTB" TextWrapping="Wrap" Text="Last Updated:" Margin="0,0,10,0" FontWeight="Bold"/>
@@ -50,15 +50,15 @@
             <StackPanel Orientation="Horizontal">
                 <TextBlock x:Name="TotalTDurationTB" TextWrapping="Wrap" Text="Total Duration:" Margin="0,0,10,0" FontWeight="Bold"/>
                 <TextBlock x:Name="TotalDurationTBx" Height="23" TextWrapping="Wrap" 
-                         Text="{Binding TotalDuration, StringFormat={}{0:%d} days\, {0:%h} hours\, {0:%m} minutes\, {0:%s} seconds}"/>
+                         Text="{Binding TotalDuration}"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBlock x:Name="TotalVideoViewsTB" TextWrapping="Wrap" Text="Total # Videos Views:" Margin="0,0,10,0" FontWeight="Bold"/>
-                <TextBox x:Name="TotalVideoViewsTBx" Height="23" TextWrapping="Wrap" Text="{Binding TotalVideoViewCount, StringFormat={}{0:0\,0}}" IsReadOnly="True"/>
+                <TextBlock x:Name="TotalVideoViewsTBx" Height="23" TextWrapping="Wrap" Text="{Binding TotalVideoViewCount, StringFormat={}{0:#\,#}}" />
             </StackPanel>
             <StackPanel Orientation="Horizontal">
                 <TextBlock x:Name="TotalCommentsTB" TextWrapping="Wrap" Text="Total # Comments:" Margin="0,0,10,0" FontWeight="Bold"/>
-                <TextBox x:Name="TotalCommentsTBx" Height="23" TextWrapping="Wrap" IsReadOnly="True" Text="{Binding TotalCommentsCount, StringFormat={}{0:0\,0}}"/>
+                <TextBlock x:Name="TotalCommentsTBx" Height="23" TextWrapping="Wrap"  Text="{Binding TotalCommentsCount, StringFormat={}{0:#\,#}}"/>
             </StackPanel>
         </StackPanel>
         <ListBox x:Name="VideosLB" Grid.Column="1" Margin="5" Grid.Row="1" ItemsSource="{Binding PlaylistVideos}" />
