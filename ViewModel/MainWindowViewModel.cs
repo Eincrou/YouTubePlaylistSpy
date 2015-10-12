@@ -183,10 +183,18 @@ namespace YouTubePlaylistSpy.ViewModel
             IsGeneratingData = true;
             _youTubePlaylist = new YouTubePlaylistPage(textInput);
             await _youTubePlaylist.DownloadPageAsync();
-            _videoGroup = await _youTubePlaylist.GetYouTubeVideoGroupAsync();
+            _videoGroup = new YouTubeVideoGroup(_youTubePlaylist.VideoUrlsList);
+            _videoGroup.VideoReady += _videoGroup_VideoReady;
+            await _videoGroup.DownloadPagesForVideosNotReadyAsync();
+            //_videoGroup = await _youTubePlaylist.GetYouTubeVideoGroupAsync();
             SetInformation();
             IsGeneratingData = false;
             return true;
+        }
+
+        private void _videoGroup_VideoReady(object sender, VideoGroupEventArgs e)
+        {
+            SetInformation();
         }
 
         private void SetInformation()
@@ -205,11 +213,11 @@ namespace YouTubePlaylistSpy.ViewModel
         private string SetTotalDuration()
         {
             var sb = new StringBuilder();
-            if (_videoGroup.DurationTotal.TotalHours > 0)
-                sb.Append(string.Format("{0:####} hours, ", _videoGroup.DurationTotal.TotalHours));
+            if (_videoGroup.DurationTotal.TotalHours > 1)
+                sb.Append($"{_videoGroup.DurationTotal.TotalHours:####} hours, ");
             if (_videoGroup.DurationTotal.Minutes > 0)
-                sb.Append(string.Format("{0} minutes, ", _videoGroup.DurationTotal.Minutes));
-            sb.Append(string.Format("{0} seconds ", _videoGroup.DurationTotal.Seconds));
+                sb.Append($"{_videoGroup.DurationTotal.Minutes} minutes, ");
+            sb.Append($"{_videoGroup.DurationTotal.Seconds} seconds.");
             return sb.ToString();
         }
 
